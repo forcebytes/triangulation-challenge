@@ -22,7 +22,7 @@ For implementation, I used Mapbox's Delaunator library (https://github.com/mapbo
 
 ## Time
 
-15 hours. 4 hours was spent on research and the remaining time was spent on coding and developing the solution
+18 hours. 4 hours was spent on research and the remaining time was spent on coding and developing the solution
 
 ## Improvements
 
