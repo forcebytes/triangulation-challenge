@@ -147,13 +147,20 @@ function completeTriangles1() {
   const triangles = groupDelaunayTriangles();
   let i = 0;
 
+  // Check for triangles where all vertices are on the hull. These are completed triangles
+  for (const triangle of triangles) {
+    if (isVertexOnHull(triangle[0]) && isVertexOnHull(triangle[1]) && isVertexOnHull(triangle[2])) {
+      completedTriangles.push(triangle);
+    }
+  }
+
   while (i < triangles.length && completedTriangles.length < 2) {
     const triangle = triangles[i];
 
     // Determine how many triangles will be completed if current triangle is colored
     let trianglesCopy = triangles.slice(); // To prevent double counting, copy triangles array and remove current triangle
     trianglesCopy.splice(i, 1);
-    const potentialTriangles = determineCompletedTriangles(triangles[i], completedTriangles, trianglesCopy);
+    const potentialTriangles = determineCompletedTriangles(triangle, completedTriangles, trianglesCopy);
     
     // complete current and potential triangles if it does not exceed the number of triangles to complete
     // the +1 in the if condition is to include the current triangle
@@ -190,32 +197,34 @@ function completeTriangles1() {
 
 // Determine how many triangles will be copleted with given triangle is completed
 // For each vertex of given triangle, count how many completed triangles from coloring the vertex
+// TODO: unit test
 function determineCompletedTriangles(currentTriangle, completedTriangles, triangles) {
   const potentialTriangles = [];
   const completedVertices = completedTriangles.flat();
 
-  for (const vertex of currentTriangle) {
-    // Get all triangles that shares the vertex
-    const candidates = [];
-    triangles.forEach(triangle => {
-      if (triangle.indexOf(vertex) >= 0) {
-        candidates.push(triangle);
-      }
-    });
-
-    // Of these candidates, keep triangles that are completed if vertex is colored
-    for (const triangle of candidates) {
-      let otherVertices = triangle.slice();
-      otherVertices.splice(triangle.indexOf(vertex), 1)
-
-      // if other vertices of the triangle are already colored, then coloring vertex will complete the triangle
-      if ((completedVertices.indexOf(otherVertices[0]) >= 0 || delaunay.hull.indexOf(otherVertices[0]) >= 0) &&
-        (completedVertices.indexOf(otherVertices[1]) >= 0 || delaunay.hull.indexOf(otherVertices[1]) >= 0)) {
-        potentialTriangles.push(triangle);
-      }
+  // Get all neighboring triangles (triangles that share at least 1 vertex with current triangle)
+  const neighbors = [];
+  triangles.forEach(triangle => {
+    if (currentTriangle.indexOf(triangle[0]) >= 0 || currentTriangle.indexOf(triangle[1]) >= 0
+      || currentTriangle.indexOf(triangle[2]) >= 0) {
+        neighbors.push(triangle);
     }
-    
-  }
+  });
+
+  // for each neighbor check if all vertices are:
+  // - on the hull;
+  // - part of an already completed triangle; or
+  // - part of current triangle
+  // if any mentioned conditions hold true for all vertices, it is a potential triangle
+  neighbors.forEach(triangle => {
+    const potentialVertex1 = isPotentialCompletedVertex(triangle[0], completedVertices, currentTriangle);
+    const potentialVertex2 = isPotentialCompletedVertex(triangle[1], completedVertices, currentTriangle);
+    const potentialVertex3 = isPotentialCompletedVertex(triangle[2], completedVertices, currentTriangle);
+
+    if (potentialVertex1 && potentialVertex2 && potentialVertex3) {
+      potentialTriangles.push(triangle);
+    }
+  });
 
   return potentialTriangles;
 }
@@ -262,8 +271,14 @@ function colorVertex(index) {
   var colorIndex = Math.floor(Math.random() * VERTEX_COLORS.length);
   ctx.strokeStyle = VERTEX_COLORS[colorIndex];
   ctx.fillStyle = VERTEX_COLORS[colorIndex];
+  
   ctx.fill();
   ctx.stroke();
+}
+
+function isPotentialCompletedVertex(vertex, completedVertices, currentTriangle) {
+  return (delaunay.hull.indexOf(vertex) >= 0 || completedVertices.indexOf(vertex) >= 0 
+    || currentTriangle.indexOf(vertex) >= 0);
 }
 
 function isVertexOnHull(index) {
