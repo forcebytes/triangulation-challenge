@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Polygon Triangulation - Delaunay Triangulation</title>
+
+    <link rel="stylesheet" href="resources/styles/styles.css">
+  </head>
+
+  <body>
+
+    <h2>Polygon Triangulation - Delaunay Triangulation</h2>
+    <form class="vertex-form" action="javascript:generateAndDraw()">
+      <label for="vertexAmount">Number of vertices to generate: </label>
+      <input type="number" id="vertexAmount" name="vertexAmount" value="50" />
+      <input type="submit" value="Generate" />
+    </form>
+    <div id="no-triangles" class="no-triangles">Unable to find 2 completed triangles</div>
+    <canvas id="canvas"></canvas>
+    <script src="resources/js/delaunator.min.js"></script>
+    <script src="resources/js/myscript.js"></script>
+
+  </body>
+
+</html>
