@@ -30,4 +30,4 @@ Because the delaunator library is written using javascript, the solution was don
 
 ## Installation and Execution
 
-Simply clone the repository and run index.html on a browser.
+Simply clone the repository and open index.html on a browser.
