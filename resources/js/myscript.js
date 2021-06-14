@@ -131,7 +131,7 @@ function draw() {
     ctx.stroke();
   }
 
-  completeTriangles1();
+  completeTriangles();
 }
 
 // Complete triangle algorithm:
@@ -142,7 +142,7 @@ function draw() {
 // - if total number completed triangles <= amount of required completed triangles, color it
 //    - if false, find another triangle
 
-function completeTriangles1() {
+function completeTriangles() {
   const completedTriangles = []; // completed triangles have all vertices colored
   const triangles = groupDelaunayTriangles();
   let i = 0;
@@ -154,6 +154,7 @@ function completeTriangles1() {
     }
   }
 
+  // loop through all the triangles to find 2 completed triangles
   while (i < triangles.length && completedTriangles.length < 2) {
     const triangle = triangles[i];
 
@@ -162,8 +163,9 @@ function completeTriangles1() {
     trianglesCopy.splice(i, 1);
     const potentialTriangles = determineCompletedTriangles(triangle, completedTriangles, trianglesCopy);
     
-    // complete current and potential triangles if it does not exceed the number of triangles to complete
-    // the +1 in the if condition is to include the current triangle
+    // complete (color) current and potential triangles if it does not exceed the number of triangles to complete (2)
+    // do not re-add already completed triangles
+    // the +1 in the if condition is to include the current triangle in the count
     if ((potentialTriangles.length + completedTriangles.length + 1)<= TRIANGLES_TO_COMPLETE && completedTriangles.indexOf(triangle) == -1) {
       completedTriangles.push(triangle);  
       // color vertices
@@ -177,7 +179,7 @@ function completeTriangles1() {
         }
       }
 
-      // With new completed triangles, reset iteration to account for new colored vertices
+      // Reset iteration to account for new colored vertices
       i = -1;
     }
 
@@ -190,6 +192,7 @@ function completeTriangles1() {
   }
 
   if (completedTriangles.length < TRIANGLES_TO_COMPLETE) {
+    // With the given polygon and points inside, unable to find required completed triangles
     var warning = document.getElementById('no-triangles');
     warning.style.display = 'inline';
   }
